@@ -7,12 +7,14 @@ import jwt from 'jsonwebtoken';
 import { z } from 'zod';
 import swaggerJSDoc from 'swagger-jsdoc';
 import swaggerUi from 'swagger-ui-express';
+import cors from 'cors';
 
 const app = express();
 const port = 3000;
 const SECRET_KEY = 'your_secret_key';
 
 // Configure middleware
+app.use(cors({ origin: '*' }));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
