@@ -1,0 +1,40 @@
+<form class="flex flex-col gap-6">
+  <div class="text-center font-light">
+    <h2 class="text-2xl self-center mb-2">{{formTitle()}}</h2>
+
+    @if (formDescription()) {
+    <p class="text-secondary-foreground">{{formDescription()}}</p>
+    }
+  </div>
+
+  <div class="flex flex-col gap-1 justify-start">
+    <app-label for="username" [isRequired]="true">Username</app-label>
+    <app-input
+      type="text"
+      id="username"
+      name="password"
+      required
+      placeholder="johndoe123"
+    />
+  </div>
+
+  <div class="flex flex-col gap-1 justify-start">
+    <app-label for="password" [isRequired]="true">Password</app-label>
+    <app-input
+      type="password"
+      id="password"
+      name="password"
+      required
+      placeholder="SuperSecretPass123"
+    />
+  </div>
+
+  <div class="flex flex-col gap-4 w-full">
+    <app-button>{{submitButtonLabel()}}</app-button>
+    <a
+      class="transition-colors px-2 hover:text-primary duration-200 font-light self-center"
+      [routerLink]="redirectLink()"
+      >{{redirectLinkLabel()}}</a
+    >
+  </div>
+</form>
