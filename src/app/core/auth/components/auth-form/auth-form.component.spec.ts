@@ -1,6 +1,7 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 
 import { AuthFormComponent } from './auth-form.component';
+import { provideRouter } from '@angular/router';
 
 describe('AuthFormComponent', () => {
   let component: AuthFormComponent;
@@ -8,9 +9,9 @@ describe('AuthFormComponent', () => {
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      imports: [AuthFormComponent]
-    })
-    .compileComponents();
+      imports: [AuthFormComponent],
+      providers: [provideRouter([])],
+    }).compileComponents();
 
     fixture = TestBed.createComponent(AuthFormComponent);
     component = fixture.componentInstance;
