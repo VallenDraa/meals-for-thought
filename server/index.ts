@@ -220,7 +220,7 @@ app.post('/register', async (req, res) => {
  *   post:
  *     tags:
  *       - Authentication
- *     summary: Login to get access token
+ *     summary: Login to get access token and user details
  *     requestBody:
  *       required: true
  *       content:
@@ -245,6 +245,10 @@ app.post('/register', async (req, res) => {
  *           application/json:
  *             example:
  *               token: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
+ *               user: {
+ *                 id: 1,
+ *                 username: "johndoe"
+ *               }
  *       401:
  *         description: Invalid credentials
  *         content:
@@ -255,9 +259,10 @@ app.post('/register', async (req, res) => {
 app.post('/login', async (req, res) => {
   try {
     const { username, password } = await loginSchema.parseAsync(req.body);
-    const user = await db.get('SELECT * FROM users WHERE username = ?', [
-      username,
-    ]);
+    const user = await db.get(
+      'SELECT id, username FROM users WHERE username = ?',
+      [username]
+    );
 
     if (!user || !(await bcrypt.compare(password, user.password))) {
       res.status(401).json({ message: 'Invalid credentials' });
@@ -265,12 +270,59 @@ app.post('/login', async (req, res) => {
     }
 
     const token = jwt.sign({ id: user.id }, SECRET_KEY, { expiresIn: '1h' });
-    res.json({ token });
+
+    res.json({
+      token,
+      user: { id: user.id, username: user.username },
+    });
   } catch (err) {
     if (err instanceof z.ZodError) {
       res.status(400).json({ errors: err.errors });
       return;
     }
+    res.status(500).json({ message: 'An error occurred' });
+  }
+});
+
+/**
+ * @swagger
+ * /me:
+ *   get:
+ *     tags:
+ *       - Users
+ *     summary: Get current user details
+ *     security:
+ *       - bearerAuth: []
+ *     responses:
+ *       200:
+ *         description: User details fetched successfully
+ *         content:
+ *           application/json:
+ *             example:
+ *               id: 1
+ *               username: "johndoe"
+ *       401:
+ *         description: Unauthorized
+ *         content:
+ *           application/json:
+ *             example:
+ *               message: "Unauthorized"
+ */
+app.get('/me', authenticate, async (req, res) => {
+  try {
+    const userId = res.locals.userId;
+
+    const user = await db.get('SELECT id, username FROM users WHERE id = ?', [
+      userId,
+    ]);
+
+    if (!user) {
+      res.status(404).json({ message: 'User not found' });
+      return;
+    }
+
+    res.json(user);
+  } catch (err) {
     res.status(500).json({ message: 'An error occurred' });
   }
 });
