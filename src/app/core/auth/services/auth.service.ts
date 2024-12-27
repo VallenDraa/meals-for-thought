@@ -8,9 +8,8 @@ import {
 } from '../models/auth.model';
 import { MessageApiResponse } from '@/core/model/api-response.model';
 import { JwtService } from './jwt.service';
-import { Router } from '@angular/router';
-import { User } from '../models/user.model';
-import { BehaviorSubject, tap } from 'rxjs';
+import { Observable, of, tap } from 'rxjs';
+import { AuthStoreService } from '../stores/auth-store.service';
 
 @Injectable({
   providedIn: 'root',
@@ -18,15 +17,14 @@ import { BehaviorSubject, tap } from 'rxjs';
 export class AuthService {
   private http = inject(HttpClient);
   private jwtService = inject(JwtService);
-  private router = inject(Router);
 
-  private currentUserSubject = new BehaviorSubject<User | null>(null);
+  private authStore = inject(AuthStoreService);
 
   login(data: LoginModel) {
     return this.http.post<LoginResponseModel>('/login', data).pipe(
       tap(({ user, token }) => {
         this.jwtService.saveToken(token);
-        this.currentUserSubject.next(user);
+        this.authStore.setUser(user);
       })
     );
   }
@@ -37,23 +35,22 @@ export class AuthService {
 
   logout() {
     this.jwtService.destroyToken();
-    this.currentUserSubject.next(null);
-    this.router.navigate(['/auth/login']);
+    this.authStore.clearUser();
   }
 
-  loadCurrentUser() {
+  loadCurrentUser(): Observable<MeResponseModel | null> {
     const token = this.jwtService.getToken();
 
     return token
       ? this.http.get<MeResponseModel>('/me').pipe(
           tap(({ user }) => {
-            this.currentUserSubject.next(user);
+            this.authStore.setUser(user);
           })
         )
-      : null;
+      : of(null);
   }
 
-  get currentUser() {
-    return this.currentUserSubject.asObservable();
+  get currentUser$() {
+    return this.authStore.getUser();
   }
 }

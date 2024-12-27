@@ -196,7 +196,10 @@ const foodQuerySchema = z.object({
  */
 app.post('/register', async (req, res) => {
   try {
-    const { username, password } = await registerSchema.parseAsync(req.body);
+    const { username, password } = await registerSchema.parseAsync({
+      username: req.body.username,
+      password: req.body.password,
+    });
     const hashedPassword = await bcrypt.hash(password, 10);
 
     await db.run('INSERT INTO users (username, password) VALUES (?, ?)', [
@@ -206,10 +209,14 @@ app.post('/register', async (req, res) => {
 
     res.status(201).json({ message: 'User registered successfully' });
   } catch (err) {
+    console.log(err);
     if (err instanceof z.ZodError) {
-      res.status(400).json({ errors: err.errors });
+      res
+        .status(400)
+        .json({ message: err.errors.map((e) => e.message).join(', ') });
       return;
     }
+
     res.status(400).json({ message: 'Username already exists' });
   }
 });
@@ -260,7 +267,7 @@ app.post('/login', async (req, res) => {
   try {
     const { username, password } = await loginSchema.parseAsync(req.body);
     const user = await db.get(
-      'SELECT id, username FROM users WHERE username = ?',
+      'SELECT id, username, password FROM users WHERE username = ?',
       [username]
     );
 
@@ -321,7 +328,7 @@ app.get('/me', authenticate, async (req, res) => {
       return;
     }
 
-    res.json(user);
+    res.json({ user });
   } catch (err) {
     res.status(500).json({ message: 'An error occurred' });
   }

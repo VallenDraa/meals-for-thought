@@ -5,7 +5,6 @@ import {
 } from '@angular/common/http/testing';
 import { AuthService } from './auth.service';
 import { JwtService } from './jwt.service';
-import { Router } from '@angular/router';
 import {
   LoginModel,
   LoginResponseModel,
@@ -15,13 +14,11 @@ import {
 import { MessageApiResponse } from '@/core/model/api-response.model';
 import { provideHttpClient } from '@angular/common/http';
 import { User } from '../models/user.model';
-import { lastValueFrom } from 'rxjs';
 
 describe('AuthService', () => {
   let service: AuthService;
   let httpMock: HttpTestingController;
   let jwtServiceSpy: jasmine.SpyObj<JwtService>;
-  let routerSpy: jasmine.SpyObj<Router>;
 
   beforeEach(() => {
     jwtServiceSpy = jasmine.createSpyObj('JwtService', [
@@ -29,14 +26,12 @@ describe('AuthService', () => {
       'saveToken',
       'destroyToken',
     ]);
-    routerSpy = jasmine.createSpyObj('Router', ['navigate']);
 
     TestBed.configureTestingModule({
       providers: [
         provideHttpClient(),
         provideHttpClientTesting(),
         { provide: JwtService, useValue: jwtServiceSpy },
-        { provide: Router, useValue: routerSpy },
       ],
     });
 
@@ -89,7 +84,6 @@ describe('AuthService', () => {
     service.logout();
 
     expect(jwtServiceSpy.destroyToken).toHaveBeenCalled();
-    expect(routerSpy.navigate).toHaveBeenCalledWith(['/auth/login']);
   });
 
   describe('loadCurrentUser', () => {
@@ -103,7 +97,7 @@ describe('AuthService', () => {
 
       service.loadCurrentUser()?.subscribe(() => {
         expect(jwtServiceSpy.getToken).toHaveBeenCalled();
-        expect(service['currentUser']).toBeTruthy();
+        expect(service['currentUser$']).toBeTruthy();
       });
 
       const req = httpMock.expectOne('/me');
@@ -122,12 +116,12 @@ describe('AuthService', () => {
 
   describe('currentUser', () => {
     it('should have default value of null', () => {
-      service.currentUser.subscribe((user) => {
+      service.currentUser$.subscribe((user) => {
         expect(user).toBeNull();
       });
     });
 
-    it('should update the value when a user logs in', async () => {
+    it('should update the value when a user logs in', () => {
       const mockUser: User = { id: 1, username: 'user' };
       const mockData: LoginModel = { username: 'user', password: 'pw123' };
       const mockResponse: LoginResponseModel = {
@@ -135,13 +129,13 @@ describe('AuthService', () => {
         user: mockUser,
       };
 
-      await lastValueFrom(service.login(mockData));
+      service.login(mockData).subscribe();
 
       const req = httpMock.expectOne('/login');
       expect(req.request.method).toBe('POST');
       req.flush(mockResponse);
 
-      service.currentUser.subscribe((user) => {
+      service.currentUser$.subscribe((user) => {
         expect(user).toEqual(mockUser);
       });
     });

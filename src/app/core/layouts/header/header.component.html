@@ -4,15 +4,10 @@
       <a routerLink="/">MealsForThought 🫘</a>
     </h1>
 
-    <nav>
-      <ul class="flex items-center gap-1">
-        @for (menu of navMenuLinks; track menu.link) {
-
-        <li>
-          <a mat-button [routerLink]="menu.link">{{menu.label}}</a>
-        </li>
-        }
-      </ul>
+    <nav class="flex items-center gap-1">
+      @for (menu of (filteredMenuLinks$ | async); track menu.link) {
+      <a mat-button [routerLink]="menu.link">{{menu.label}}</a>
+      }
     </nav>
   </mat-toolbar>
 </header>
