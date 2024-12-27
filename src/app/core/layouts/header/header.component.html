@@ -1,37 +1,18 @@
-<header class="max-w-screen-md mx-auto">
-  <div
-    class="flex items-center justify-between gap-2 border-b border-border mx-6 py-4"
-  >
+<header class="max-w-screen-md mx-auto hidden md:block">
+  <mat-toolbar class="!bg-transparent flex items-center justify-between !px-6">
     <h1 class="font-light text-xl">
       <a routerLink="/">MealsForThought 🫘</a>
     </h1>
 
     <nav>
-      <ul class="flex items-center gap-1 group">
-        <li>
-          <a
-            class="transition-colors px-2 hover:text-primary duration-200 text-lg font-light"
-            routerLink="/"
-            >Discover</a
-          >
-        </li>
+      <ul class="flex items-center gap-1">
+        @for (menu of navMenuLinks; track menu.link) {
 
         <li>
-          <a
-            class="transition-colors px-2 hover:text-primary duration-200 text-lg font-light"
-            routerLink="/profile"
-            >Profile</a
-          >
+          <a mat-button [routerLink]="menu.link">{{menu.label}}</a>
         </li>
-
-        <li>
-          <a
-            class="transition-colors px-2 hover:text-primary duration-200 text-lg font-light"
-            routerLink="/auth/login"
-            >Login
-          </a>
-        </li>
+        }
       </ul>
     </nav>
-  </div>
+  </mat-toolbar>
 </header>

@@ -1,12 +1,20 @@
-import { Component, input } from '@angular/core';
-import { LabelComponent } from '@/shared/components/label/label.component';
-import { InputComponent } from '@/shared/components/input/input.component';
-import { ButtonComponent } from '@/shared/components/button/button.component';
+import { ReactiveFormsModule, FormBuilder, Validators } from '@angular/forms';
+import { Component, inject, input } from '@angular/core';
+import { MatInputModule } from '@angular/material/input';
+import { MatFormFieldModule } from '@angular/material/form-field';
+import { MatButtonModule } from '@angular/material/button';
 import { RouterLink } from '@angular/router';
+import { strongPasswordValidator } from '@/shared/validators/strong-password.validator';
 
 @Component({
   selector: 'app-auth-form',
-  imports: [LabelComponent, InputComponent, ButtonComponent, RouterLink],
+  imports: [
+    RouterLink,
+    ReactiveFormsModule,
+    MatButtonModule,
+    MatFormFieldModule,
+    MatInputModule,
+  ],
   templateUrl: './auth-form.component.html',
 })
 export class AuthFormComponent {
@@ -15,4 +23,21 @@ export class AuthFormComponent {
   submitButtonLabel = input<string>('');
   redirectLinkLabel = input<string>('');
   redirectLink = input<string>('');
+
+  formBuilder = inject(FormBuilder);
+
+  authForm = this.formBuilder.nonNullable.group({
+    username: this.formBuilder.control('', [
+      Validators.required,
+      Validators.minLength(1),
+    ]),
+    password: this.formBuilder.control('', [
+      Validators.required,
+      strongPasswordValidator,
+    ]),
+  });
+
+  handleSubmit() {
+    console.log(this.authForm.value);
+  }
 }

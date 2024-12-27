@@ -1,1 +1,16 @@
-<p>footer works!</p>
+<footer
+  class="bg-surface-container shadow-xl border border-surface-container-highest text-on-surface h-16 px-6 max-w-screen-md block md:hidden"
+>
+  <nav class="flex h-full py-2">
+    @for (menu of navMenuLinks; track menu.link) {
+    <a
+      mat-button
+      [routerLink]="menu.link"
+      class="flex flex-col items-center w-full !h-full gap-2 py-1"
+    >
+      <mat-icon class="scale-[135%] !m-0">{{menu.icon}}</mat-icon>
+      <span class="text-sm font-normal">{{menu.label}} </span>
+    </a>
+    }
+  </nav>
+</footer>

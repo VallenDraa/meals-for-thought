@@ -1,40 +1,49 @@
-<form class="flex flex-col gap-6">
+<div class="space-y-6 flex flex-col items-stretch w-full">
   <div class="text-center font-light">
-    <h2 class="text-2xl self-center mb-2">{{formTitle()}}</h2>
+    <h2 class="text-2xl self-center mb-2 text-on-surface">{{formTitle()}}</h2>
 
     @if (formDescription()) {
-    <p class="text-secondary-foreground">{{formDescription()}}</p>
+    <p class="text-on-secondary-container text-headline-large">
+      {{formDescription()}}
+    </p>
     }
   </div>
 
-  <div class="flex flex-col gap-1 justify-start">
-    <app-label for="username" [isRequired]="true">Username</app-label>
-    <app-input
-      type="text"
-      id="username"
-      name="password"
-      required
-      placeholder="johndoe123"
-    />
-  </div>
+  <form
+    (ngSubmit)="handleSubmit()"
+    [formGroup]="authForm"
+    class="flex flex-col gap-6"
+  >
+    <mat-form-field appearance="fill">
+      <mat-label>Username</mat-label>
+      <input formControlName="username" matInput type="text" />
+      @if (authForm.get("username")?.hasError("minlength")) {
+      <mat-error>Username must not be empty.</mat-error>
+      }
+    </mat-form-field>
 
-  <div class="flex flex-col gap-1 justify-start">
-    <app-label for="password" [isRequired]="true">Password</app-label>
-    <app-input
-      type="password"
-      id="password"
-      name="password"
-      required
-      placeholder="SuperSecretPass123"
-    />
-  </div>
+    <mat-form-field appearance="fill">
+      <mat-label>Password</mat-label>
+      <input formControlName="password" matInput type="password" />
+      @if (authForm.get("password")?.hasError("strongPassword")) {
+      <mat-error
+        >Password must have 8 characters consisting of a symbol, uppercase
+        letter, lowercase letter, and numbers.</mat-error
+      >
+      }
+    </mat-form-field>
 
-  <div class="flex flex-col gap-4 w-full">
-    <app-button>{{submitButtonLabel()}}</app-button>
-    <a
-      class="transition-colors px-2 hover:text-primary duration-200 font-light self-center"
-      [routerLink]="redirectLink()"
-      >{{redirectLinkLabel()}}</a
-    >
-  </div>
-</form>
+    <div class="flex flex-col gap-4 w-full">
+      <button mat-flat-button [disabled]="!authForm.valid" type="submit">
+        {{submitButtonLabel()}}
+      </button>
+      <a
+        mat-button
+        [routerLink]="redirectLink()"
+        class="w-max mx-auto inline-block"
+      >
+        {{redirectLinkLabel()}}
+      </a>
+    </div>
+  </form>
+</div>
